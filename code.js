@@ -1,49 +1,74 @@
 function are_isomorphic(graph1, graph2) {
-    /*
-    Three checks of isomorphism:
-    a) Same number of vertices
-    b) Same number of edges
-    c) Same number of vertices of given degree
-    */
+    // Property at play: Two graphs are isomorphic if and only if 
+    // for some ordering of their vertices their adjacency matrices are identical
+    //
+    // Method: Try every permutaton of the vertices and see if the corresponding adjacency matrix works
+    //
+    // Graphs are of the form [ [list of vertices where vertices are such that 0 <= v < n], 
+    // [list of edges, where [u,v] is an unweighted & undirected edge connecting u to v] ]
 
-    //a)
-    let V1 = graph1[0];
-    let V2 = graph2[0];
-    if (V1.length != V2.length) return false;
-
-    //b)
-    let E1 = graph1[1];
-    let E2 = graph2[1];
-    if (E1.length != E2.length) return false;
-
-    //c)
-    let degrees1 = graphToDegreeList(graph1); //degrees1[i] contains the number of vertices in graph1 with degree i
-    let degrees2 = graphToDegreeList(graph2); 
-    for (let i = 0; i < degrees1.length; i++) {
-        if (degrees1[i] != degrees2[i]) return false;
-    }
-    return true;
+    if (graph1[0].length != graph2[0].length || graph1[1].length != graph2[1].length) return false;
+    const MATRIX = undirectedGraphToAdjMatrix(graph1); //fix the first matrix and only change the second
+    return permuteMatrix(MATRIX,graph2,0);
 }
 
-function graphToDegreeList(graph) {
+function permuteMatrix(MATRIX,graph,lo) { // loosely based on my brute-force-sort 'permSort' function.
+    if (matrixEquality(MATRIX,undirectedGraphToAdjMatrix(graph))) return true;
+    let V = graph[0];
+    if (lo >= V.length-1) return false;
+    for (let i = lo; i < V.length; i++) {
+        if (i != lo) {
+            swap(V,lo,i);
+            graph[0] = V;
+        }
+        if (permuteMatrix(MATRIX,graph,lo+1)) return true;
+        if (i != lo) {
+            swap(V,lo,i);
+            graph[0] = V;
+        }
+    }
+    return false;
+}
+function swap(a,lo,i) {
+    let tmp = a[lo];
+    a[lo] = a[i];
+    a[i] = tmp;
+    return;
+}
+
+function undirectedGraphToAdjMatrix(graph) {
     let V = graph[0];
     let E = graph[1];
-    let degrees = [];
-    let adjList = [];
-    let max = 0;
-    for (let i = 0; i < E.length; i++) {
-        max = Math.max(max, E[i][0], E[i][1]);
+    let adjMatrix = [];
+    if (V.length == 0) return adjMatrix;
+    for (let i = 0; i < V.length; i++) { 
+        adjMatrix[i] = [];
+        for (let j = 0; j < V.length; j++) {
+            adjMatrix[i][j] = 0;
+        }
     }
-    for (let i = 0; i <= max; i++) adjList[i] = [];
-    for (let i = 0; i < E.length; i++) {
-        let edge = E[i];
-        adjList[edge[0]].push(edge[1]);
+    for (let i = 0; i < V.length; i++) {
+        let vertex = V[i];
+        for (let j = 0; j < E.length; j++) {
+            let edge = E[j];
+            if (edge.indexOf(vertex) == 0) {
+                adjMatrix[i][V.indexOf(edge[1])] = 1;
+                adjMatrix[V.indexOf(edge[1])][i] = 1;
+            } else if (edge.indexOf(vertex) == 1) {
+                adjMatrix[i][V.indexOf(edge[0])] = 1;
+                adjMatrix[V.indexOf(edge[0])][i] = 1;
+            }
+        }
     }
-    for (let i = 0; i < adjList.length; i++) {
-        let deg = adjList[i].length;
-        if (deg == 0) continue;
-        if (degrees[deg] == undefined) degrees[deg] = 1;
-        else degrees[deg]++;
+    return adjMatrix;
+}
+
+function matrixEquality(m1,m2) {
+    if (m1.length != m2.length) return false;
+    for (let i = 0; i < m1.length; i++) {
+        for (let j = 0; j < m1[i].length; j++) {
+            if (m1[i][j] != m2[i][j]) return false;
+        }
     }
-    return degrees;
+    return true;
 }
