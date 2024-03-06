@@ -1,3 +1,4 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/NYae883E)
 # Graph Isomorphism
 
 Devise an algorithm to determine whether two given graphs are isomorphic or not.
@@ -15,3 +16,7 @@ the function and run automatically when you commit through a GitHub action.
 ## Runtime Analysis
 
 What is the worst-case big $\Theta$ time complexity of your algorithm?
+
+## Answer
+
+In the worst case we go through each permutation of V to find the arrangement that yields identical adjacency matrices. This would be $|V|!$ combinations. Generating each combination takes constant time, and then generating the new adjacency matrix for each permutation of V takes $|V|^2$ time. Then, for each new matrix we check to see if the two matrices are equal, which is a $|V|^2$ operation. All told, the worst case runtime is $\Theta(|V|! \cdot |V|^4)$.
